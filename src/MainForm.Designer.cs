@@ -38,22 +38,26 @@ namespace UPG_SP_2024
             // 
             drawingPanel.Dock = DockStyle.Fill;
             drawingPanel.Location = new Point(0, 0);
-            drawingPanel.Name = "drawingPanel";            
-            drawingPanel.TabIndex = 0;            
+            drawingPanel.Name = "drawingPanel";
+            drawingPanel.Size = new Size(784, 559);
+            drawingPanel.TabIndex = 0;
+            drawingPanel.Paint += drawingPanel_Paint;
+            drawingPanel.Resize += drawingPanel_Resize;
             // 
             // MainForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;            
+            AutoScaleDimensions = new SizeF(7F, 17F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(784, 559);
             Controls.Add(drawingPanel);
             Name = "MainForm";
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "<Osobní číslo> - Semestrální práce KIV/UPG 2024/2025";
+            Text = "<A23B0083P> - Semestrální práce KIV/UPG 2024/2025";
             ResumeLayout(false);
         }
 
         #endregion
 
-        private Panel drawingPanel;
+        private DrawingPanel drawingPanel;
     }
 }

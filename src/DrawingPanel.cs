@@ -13,7 +13,10 @@ namespace UPG_SP_2024
         /// <summary>Initializes a new instance of the <see cref="DrawingPanel" /> class.</summary>
         public DrawingPanel()
         {
+            
             this.ClientSize = new System.Drawing.Size(800, 600);
+            this.Dock = DockStyle.Fill;
+
         }
 
 
@@ -24,12 +27,20 @@ namespace UPG_SP_2024
         {
             Graphics g = e.Graphics;
 
-            //TODO: Add custom paint code here
+            List<Charge> charges = new List<Charge> 
+            {
+                new Charge(this.Width/2,this.Height/2,1)
+            };
 
-            g.FillEllipse(Brushes.Red, this.Width / 2, this.Height / 4, 100, 100);
+            foreach(Charge charge in charges)
+            {
+                charge.Draw(g);
+            }
 
-            // Calling the base class OnPaint
-            base.OnPaint(e);
+            var field = ElectricField.CalculateField(charges, (this.Width / 2) + 20, this.Height / 2);
+
+            ELectricFieldVector vector = new ELectricFieldVector(200, 300, field.X, field.Y);
+            vector.Draw(g);
         }
 
         /// <summary>

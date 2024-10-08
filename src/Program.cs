@@ -11,7 +11,8 @@ namespace UPG_SP_2024
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            MainForm mainForm = new MainForm();
+            Application.Run(mainForm);
         }
     }
 }
