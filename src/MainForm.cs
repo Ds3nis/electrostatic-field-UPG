@@ -6,20 +6,36 @@ namespace UPG_SP_2024
 {
     public partial class MainForm : Form
     {
-        public MainForm()
+        private Scenario scenario;
+        public MainForm(Scenario scenario)
         {
-        
+
             InitializeComponent();
-            this.MinimumSize = new Size(800, 600);
             this.Size = new Size(800, 600);
+            this.scenario = scenario;
+            this.drawingPanel._scenario = scenario;
         }
 
         private void drawingPanel_Paint(object sender, PaintEventArgs e)
         {
+            Graphics g = e.Graphics;
 
+            List<Charge> charges = scenario.charges;
+
+
+
+            foreach (Charge charge in charges)
+            {
+                charge.Draw(g, this.drawingPanel.Width, this.drawingPanel.Height);
+            }
         }
 
         private void drawingPanel_Resize(object sender, EventArgs e)
+        {
+
+        }
+
+        private void drawingPanel_ParentChanged(object sender, EventArgs e)
         {
 
         }

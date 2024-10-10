@@ -42,39 +42,57 @@ namespace UPG_SP_2024
             this.Q = Q;
         }
 
-        public void Draw(Graphics g)
-        {
-            string chargeSymbol;
-            Color chargeColor;
-            if(this.Q > 0)
-            {
-   
-                chargeColor = Color.Blue;
-            }
-            else
-            {
-    
-                chargeColor = Color.Red;
-            }
 
+        private PointF WorldToScreen(float worldX, float worldY, int panelWidth, int panelHeight, float maxRadius)
+        {
+            // Визначаємо мінімальний масштаб для збереження пропорцій
+            /*float scaleX = panelWidth / 2f;
+            float scaleY = panelHeight / 2f;
+            float scale = Math.Min(scaleX, scaleY);*/
+            // Визначаємо масштаб з урахуванням відступів, щоб заряди не виходили за межі панелі
+            float scaleX = (panelWidth - 2 * maxRadius) / 2f;  // Відступ на радіус по обидва боки
+            float scaleY = (panelHeight - 2 * maxRadius) / 2f; // Відступ на радіус по обидва боки
+            float scale = Math.Min(scaleX, scaleY);
+
+            // Перетворюємо світові координати в пікселі
+            float screenX = (worldX * scale) + (panelWidth / 2.0f);   // Центрування по осі X
+            float screenY = (worldY * scale) + (panelHeight / 2.0f);  // Центрування по осі Y
+
+            return new PointF(screenX, screenY);
+        }
+
+        public void Draw(Graphics g, int panelWidth, int panelHeight)
+        {
+            // Перетворення координат заряду у пікселі
+   
+
+            // Задай колір залежно від заряду
+            Color chargeColor = (this.Q > 0) ? Color.Blue : Color.Red;
             Brush brush = new SolidBrush(chargeColor);
 
-          
-            float radius = Math.Abs(Q) * 10;  
+            // Радіус і діаметр для малювання кола
+            float radius = Math.Abs(Q) * 25;
             float diameter = 2 * radius;
 
+            PointF screenPosition = WorldToScreen(X, Y, panelWidth, panelHeight, radius);
+
+            // Малюємо заряд (коло) на відповідних координатах
+            g.FillEllipse(brush, screenPosition.X - radius, screenPosition.Y - radius, diameter, diameter);
+
+            // Малюємо значення заряду як текст
         
-            g.FillEllipse(brush, X - radius, Y - radius, diameter, diameter);
 
             string text = $"{Q.ToString()}";
-
             SizeF textSize = g.MeasureString(text, new Font("Arial", 14));
 
-            float textX = X - (textSize.Width / 2);
-            float textY = Y - (textSize.Height / 2);
+            float textX = screenPosition.X - (textSize.Width / 2);
+            float textY = screenPosition.Y - (textSize.Height / 2);
 
             g.DrawString(text, new Font("Arial", 14), Brushes.White, textX, textY);
         }
+  
+     
+  
 
     }
 }

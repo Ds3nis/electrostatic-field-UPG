@@ -1,1 +1,1 @@
-./bin/ElectricFieldVis.exe %*
+src\bin\Debug\net8.0-windows\ElectricFieldVis.exe %*

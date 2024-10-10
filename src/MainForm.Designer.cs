@@ -43,6 +43,7 @@ namespace UPG_SP_2024
             drawingPanel.TabIndex = 0;
             drawingPanel.Paint += drawingPanel_Paint;
             drawingPanel.Resize += drawingPanel_Resize;
+            drawingPanel.ParentChanged += drawingPanel_ParentChanged;
             // 
             // MainForm
             // 

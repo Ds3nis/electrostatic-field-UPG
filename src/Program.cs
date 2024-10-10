@@ -7,12 +7,35 @@ namespace UPG_SP_2024
         /// <summary>
         ///  The main entry point for the application.
         /// </summary>
-        static void Main()
+        static void Main(string[] args)
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            MainForm mainForm = new MainForm();
+            Scenario scenario;
+            if (args.Length > 0)
+            {
+                if (int.TryParse(args[0], out int number))
+                {
+                    scenario = new Scenario(number);
+                    MessageBox.Show("Ziskane cele cislo: " + number, "Informace", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Chyba: predany argument neni cele cislo.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    scenario = new Scenario(0);
+                }
+            }
+            else
+            {
+                scenario = new Scenario(0);              
+            }
+
+            MainForm mainForm = new MainForm(scenario);
             Application.Run(mainForm);
+
+          
+
+ 
         }
     }
 }

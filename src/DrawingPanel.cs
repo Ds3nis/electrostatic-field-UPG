@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace UPG_SP_2024
@@ -11,6 +12,8 @@ namespace UPG_SP_2024
     public class DrawingPanel : Panel
     {
         /// <summary>Initializes a new instance of the <see cref="DrawingPanel" /> class.</summary>
+        /// 
+        public Scenario _scenario;
         public DrawingPanel()
         {
             
@@ -26,22 +29,23 @@ namespace UPG_SP_2024
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
+            List<Charge> charges = _scenario.charges;
+            
 
-            List<Charge> charges = new List<Charge> 
-            {
-                new Charge(this.Width/2,this.Height/2,1)
-            };
-
-            foreach(Charge charge in charges)
-            {
-                charge.Draw(g);
-            }
-
-            var field = ElectricField.CalculateField(charges, (this.Width / 2) + 20, this.Height / 2);
-
-            ELectricFieldVector vector = new ELectricFieldVector(200, 300, field.X, field.Y);
-            vector.Draw(g);
+            this.DrawCharges(g, charges);
         }
+
+
+
+        private void DrawCharges(Graphics g, List<Charge>  charges)
+        {
+            foreach (Charge charge in charges)
+            {
+                charge.Draw(g, this.Width, this.Height);
+            }
+        }
+
+
 
         /// <summary>
         /// Fires the event indicating that the panel has been resized. Inheriting controls should use this in favor of actually listening to the event, but should still call <span class="keyword">base.onResize</span> to ensure that the event is fired for external listeners.
