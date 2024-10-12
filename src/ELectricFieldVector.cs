@@ -15,6 +15,9 @@ namespace UPG_SP_2024
             public float IntensityX { get; set; }  // Компонента вектора інтенсивності по осі X
             public float IntensityY { get; set; }  // Компонента вектора інтенсивності по осі Y
 
+
+            
+
             /// <summary>
             /// Конструктор, що ініціалізує координати і компоненти вектора
             /// </summary>
@@ -32,8 +35,8 @@ namespace UPG_SP_2024
             public void Draw(Graphics g)
             {
                 // Визначаємо кінцеву точку вектора
-                float endX = X + IntensityX * 50;  // Масштабуємо вектор для наочності
-                float endY = Y + IntensityY * 50;
+                float endX = X + IntensityX;  // Масштабуємо вектор для наочності
+                float endY = Y + IntensityY;
 
                 // Малюємо стрілку, яка представляє вектор інтенсивності
                 Pen pen = new Pen(Color.Red, 2);

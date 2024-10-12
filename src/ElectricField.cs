@@ -19,8 +19,8 @@ namespace UPG_SP_2024
             foreach (Charge charge in charges)
             {
                 // Обчислення відстані між зарядом та точкою (x, y)
-                float dx = charge.X - x;
-                float dy = charge.Y - y;
+                float dx = charge.ScreenX - x;
+                float dy = charge.ScreenY - y;
                 float r = (float)Math.Sqrt(dx * dx + dy * dy);  // Відстань
                 float vectorToCube = r * r * r;
               

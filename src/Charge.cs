@@ -15,12 +15,18 @@ namespace UPG_SP_2024
         private float _x;
         private float _y;
         private float _q;
-
+        private float _screenX;
+        private float _screenY;
         public float X
         {
             get { return _x; }
             set { _x = value; }
         }
+
+        
+        public float ScreenX { get { return _screenX; } }
+
+        public float ScreenY { get { return _screenY; } }
 
         public float Y
         {
@@ -57,6 +63,9 @@ namespace UPG_SP_2024
             // Перетворюємо світові координати в пікселі
             float screenX = (worldX * scale) + (panelWidth / 2.0f);   // Центрування по осі X
             float screenY = (worldY * scale) + (panelHeight / 2.0f);  // Центрування по осі Y
+
+            this._screenX = screenX;
+            this._screenY = screenY;
 
             return new PointF(screenX, screenY);
         }

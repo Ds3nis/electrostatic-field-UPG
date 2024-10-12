@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
+
 namespace UPG_SP_2024
 {
 
@@ -14,11 +15,25 @@ namespace UPG_SP_2024
         /// <summary>Initializes a new instance of the <see cref="DrawingPanel" /> class.</summary>
         /// 
         public Scenario _scenario;
+        public float scale;
+        private System.Windows.Forms.Timer timer;
+        private Probe probe;
+        private DateTime lastFrameTime;
         public DrawingPanel()
         {
             
             this.ClientSize = new System.Drawing.Size(800, 600);
             this.Dock = DockStyle.Fill;
+
+            probe = new Probe(1); 
+            lastFrameTime = DateTime.Now;
+
+            timer = new System.Windows.Forms.Timer();
+            timer.Interval = 16; // ~60 кадрів на секунду
+            timer.Tick += Timer_Tick;
+            timer.Start();
+
+           
 
         }
 
@@ -30,11 +45,35 @@ namespace UPG_SP_2024
         {
             Graphics g = e.Graphics;
             List<Charge> charges = _scenario.charges;
-            
+            scale = Math.Min(this.Width / 2, this.Height / 2);
 
             this.DrawCharges(g, charges);
+
+            probe.Draw(e.Graphics, this.Width, this.Height, scale);
+
+
+       
+
         }
 
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            DateTime currentTime = DateTime.Now;
+            float deltaTime = (float)(currentTime - lastFrameTime).TotalSeconds;
+            lastFrameTime = currentTime;
+
+            // Оновлюємо положення зонда
+            probe.UpdatePosition(deltaTime);
+
+            // Оновлюємо екран
+            this.Invalidate();
+        }
+
+        private void CreateIntensityVector()
+        {
+
+        }
 
 
         private void DrawCharges(Graphics g, List<Charge>  charges)
@@ -44,6 +83,9 @@ namespace UPG_SP_2024
                 charge.Draw(g, this.Width, this.Height);
             }
         }
+
+    
+
 
 
 

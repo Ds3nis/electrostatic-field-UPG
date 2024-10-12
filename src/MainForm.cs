@@ -7,6 +7,7 @@ namespace UPG_SP_2024
     public partial class MainForm : Form
     {
         private Scenario scenario;
+
         public MainForm(Scenario scenario)
         {
 
