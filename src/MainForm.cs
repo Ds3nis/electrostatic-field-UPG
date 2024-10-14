@@ -21,14 +21,11 @@ namespace UPG_SP_2024
         {
             Graphics g = e.Graphics;
 
-            List<Charge> charges = scenario.charges;
+    
 
 
 
-            foreach (Charge charge in charges)
-            {
-                charge.Draw(g, this.drawingPanel.Width, this.drawingPanel.Height);
-            }
+     
         }
 
         private void drawingPanel_Resize(object sender, EventArgs e)

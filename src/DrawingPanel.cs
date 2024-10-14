@@ -19,12 +19,14 @@ namespace UPG_SP_2024
         private System.Windows.Forms.Timer timer;
         private Probe probe;
         private DateTime lastFrameTime;
+      
         public DrawingPanel()
         {
             
             this.ClientSize = new System.Drawing.Size(800, 600);
             this.Dock = DockStyle.Fill;
-
+            this.DoubleBuffered = true;
+      
             probe = new Probe(1); 
             lastFrameTime = DateTime.Now;
 
@@ -50,9 +52,14 @@ namespace UPG_SP_2024
             this.DrawCharges(g, charges);
 
             probe.Draw(e.Graphics, this.Width, this.Height, scale);
+            PointF intensityPoint = ElectricField.CalculateField(charges, probe.X, probe.Y);
+
+            ELectricFieldVector vector = new ELectricFieldVector(probe.ScreenX, probe.ScreenY, intensityPoint);
+
+            vector.Draw(g);
 
 
-       
+
 
         }
 
@@ -63,17 +70,13 @@ namespace UPG_SP_2024
             float deltaTime = (float)(currentTime - lastFrameTime).TotalSeconds;
             lastFrameTime = currentTime;
 
-            // Оновлюємо положення зонда
+      
             probe.UpdatePosition(deltaTime);
 
-            // Оновлюємо екран
+
             this.Invalidate();
         }
 
-        private void CreateIntensityVector()
-        {
-
-        }
 
 
         private void DrawCharges(Graphics g, List<Charge>  charges)

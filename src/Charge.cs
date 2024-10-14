@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -72,25 +73,44 @@ namespace UPG_SP_2024
 
         public void Draw(Graphics g, int panelWidth, int panelHeight)
         {
-            // Перетворення координат заряду у пікселі
-   
+            Color baseColor = (this.Q > 0) ? Color.Red : Color.Blue;
+            Color shadowColor = Color.White;  
+            Color highlightColor = ControlPaint.Light(baseColor);
 
-            // Задай колір залежно від заряду
-            Color chargeColor = (this.Q > 0) ? Color.Blue : Color.Red;
-            Brush brush = new SolidBrush(chargeColor);
+     
+            float maxRadius = Math.Min(panelWidth, panelHeight) * 0.05f; 
+            float minRadius = 15f; 
 
-            // Радіус і діаметр для малювання кола
-            float radius = Math.Abs(Q) * 25;
+          
+            float radius = Math.Max(maxRadius, minRadius);  
             float diameter = 2 * radius;
 
             PointF screenPosition = WorldToScreen(X, Y, panelWidth, panelHeight, radius);
+            var charge = new GraphicsPath();
 
-            // Малюємо заряд (коло) на відповідних координатах
-            g.FillEllipse(brush, screenPosition.X - radius, screenPosition.Y - radius, diameter, diameter);
+            charge.AddEllipse(screenPosition.X - radius, screenPosition.Y - radius, diameter, diameter);
 
-            // Малюємо значення заряду як текст
-        
+            var gradient = new PathGradientBrush(charge);
+            // Встановлюємо центральну точку для відблиску (трохи зміщена вгору)
+            gradient.CenterPoint = new PointF(screenPosition.X + radius /3 , screenPosition.Y - radius / 3);
+            gradient.InterpolationColors = new ColorBlend()
+            {
+                Colors = new Color[]
+                {
+                    baseColor,
+                    highlightColor,
+                    Color.White,
+                    shadowColor     
 
+                },
+
+                Positions = new float[] { 0.0f, 0.3f, 1f , 1.0f }
+            };
+
+      /*      var chargeReion = new Region(charge);*/          
+            g.FillPath(gradient, charge);
+            charge.CloseFigure();
+      
             string text = $"{Q.ToString()}";
             SizeF textSize = g.MeasureString(text, new Font("Arial", 14));
 

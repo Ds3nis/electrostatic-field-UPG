@@ -10,40 +10,64 @@ namespace UPG_SP_2024
     public class ELectricFieldVector
     {
 
-            public float X { get; set; }  // Координата X точки, де малюється вектор
-            public float Y { get; set; }  // Координата Y точки
-            public float IntensityX { get; set; }  // Компонента вектора інтенсивності по осі X
-            public float IntensityY { get; set; }  // Компонента вектора інтенсивності по осі Y
+        private float _x;
+        private float _y;
+        private PointF _intensity;
+        private const float arrowLength = 40; // Довжина вектора в пікселях
 
 
-            
+        public ELectricFieldVector(float x, float y, PointF intensity)
+        {
+            _x = x;
+            _y = y;
+            _intensity = intensity;
+        }
 
-            /// <summary>
-            /// Конструктор, що ініціалізує координати і компоненти вектора
-            /// </summary>
-            public ELectricFieldVector(float x, float y, float intensityX, float intensityY)
+        public void Draw(Graphics g)
+        {
+            // Нормалізація вектора інтенсивності, щоб він завжди мав однаковий розмір
+            float magnitude = (float)Math.Sqrt(_intensity.X * _intensity.X + _intensity.Y * _intensity.Y);
+            if (magnitude > 0)
             {
-                this.X = x;
-                this.Y = y;
-                this.IntensityX = intensityX;
-                this.IntensityY = intensityY;
-            }
+                float normalizedX = _intensity.X / magnitude;
+                float normalizedY = _intensity.Y / magnitude;
 
-            /// <summary>
-            /// Метод для малювання вектора електричного поля
-            /// </summary>
-            public void Draw(Graphics g)
-            {
-                // Визначаємо кінцеву точку вектора
-                float endX = X + IntensityX;  // Масштабуємо вектор для наочності
-                float endY = Y + IntensityY;
+                // Кінцева точка вектора з фіксованою довжиною
+                float endX = _x + normalizedX * arrowLength;
+                float endY = _y + normalizedY * arrowLength;
 
-                // Малюємо стрілку, яка представляє вектор інтенсивності
-                Pen pen = new Pen(Color.Red, 2);
-                AdjustableArrowCap arrowCap = new AdjustableArrowCap(5, 5);  // Стрілка на кінці
-                pen.CustomEndCap = arrowCap;
+                // Малюємо лінію
+                Pen pen = new Pen(Color.Green, 2);
+                g.DrawLine(pen, _x, _y, endX, endY);
 
-                g.DrawLine(pen, X, Y, endX, endY);  // Лінія від початкової до кінцевої точки
+                // Малюємо стрілку на кінці вектора
+                DrawArrowHead(g, pen, _x, _y, endX, endY);
+
+                // Підписуємо величину поля
+                string text = $"|E| = {magnitude:F2}";
+                Font font = new Font("Arial", 12);
+                Brush brush = Brushes.Black;
+                g.DrawString(text, font, brush, endX + 5, endY + 5);
             }
         }
+
+        private void DrawArrowHead(Graphics g, Pen pen, float startX, float startY, float endX, float endY)
+        {
+            float arrowSize = 10f;  // Розмір стрілки
+            double angle = Math.Atan2(endY - startY, endX - startX);
+
+            PointF arrowPoint1 = new PointF(
+                endX - arrowSize * (float)Math.Cos(angle - Math.PI / 6),
+                endY - arrowSize * (float)Math.Sin(angle - Math.PI / 6)
+            );
+
+            PointF arrowPoint2 = new PointF(
+                endX - arrowSize * (float)Math.Cos(angle + Math.PI / 6),
+                endY - arrowSize * (float)Math.Sin(angle + Math.PI / 6)
+            );
+
+            g.DrawLine(pen, endX, endY, arrowPoint1.X, arrowPoint1.Y);
+            g.DrawLine(pen, endX, endY, arrowPoint2.X, arrowPoint2.Y);
+        }
+    }
     }

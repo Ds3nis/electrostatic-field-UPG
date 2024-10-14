@@ -13,6 +13,11 @@ namespace UPG_SP_2024
     private float radius;
     private float angularVelocity;
     private float angle;
+    private float _screenX;
+    private float _screenY;
+    public float ScreenX { get { return _screenX; } }
+
+    public float ScreenY { get { return _screenY; } }
 
     public Probe(float radius)
     {
@@ -27,15 +32,19 @@ namespace UPG_SP_2024
         angle += angularVelocity * deltaTime;
 
         // Оновлюємо координати на основі рівняння кола
-        X = radius * (float)Math.Cos(angle);
-        Y = radius * (float)Math.Sin(angle);
+        X = (radius) * (float)Math.Cos(angle);
+        Y = (radius) * (float)Math.Sin(angle);
     }
+
 
         public void Draw(Graphics g, float panelWidth, float panelHeight, float scale)
     {
-        // Перетворюємо світові координати у пікселі
-        float screenX = (X * scale) + panelWidth / 2f;
-        float screenY = (Y * scale) + panelHeight / 2f;
+            // Перетворюємо світові координати у пікселі
+            float screenX = (X * scale) + panelWidth / 2f;
+            float screenY = (Y * scale) + panelHeight / 2f;
+
+            this._screenX = screenX;
+            this._screenY = screenY;
 
         // Малюємо зонд як маленьке коло
         float probeSize = 10;
@@ -44,5 +53,7 @@ namespace UPG_SP_2024
             float r = radius * scale;
             g.DrawEllipse(Pens.Red, panelWidth / 2f - r, panelHeight / 2f - r, 2 * r, 2 * r);
     }
+
+       
     }
 }
