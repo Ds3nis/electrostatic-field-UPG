@@ -10,7 +10,7 @@ namespace UPG_SP_2024
     {
 
         public const float Epsilon_0 = (float)(8.854e-12);
-        // Метод для обчислення вектора інтенсивності електричного поля в точці (x, y)
+
         public static PointF CalculateField(List<Charge> charges, float x, float y)
         {
              
@@ -18,10 +18,10 @@ namespace UPG_SP_2024
 
             foreach (Charge charge in charges)
             {
-                // Обчислення відстані між зарядом та точкою (x, y)
+             
                 float dx = charge.X - x;
                 float dy = charge.Y - y;
-                float r = (float)Math.Sqrt(dx * dx + dy * dy);  // Відстань
+                float r = (float)Math.Sqrt(dx * dx + dy * dy); 
                 float vectorToCube = r * r * r;
               
                 if (r == 0) continue;

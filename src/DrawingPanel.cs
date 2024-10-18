@@ -26,12 +26,14 @@ namespace UPG_SP_2024
             this.ClientSize = new System.Drawing.Size(800, 600);
             this.Dock = DockStyle.Fill;
             this.DoubleBuffered = true;
+
+           
       
             probe = new Probe(1); 
             lastFrameTime = DateTime.Now;
 
             timer = new System.Windows.Forms.Timer();
-            timer.Interval = 16; // ~60 кадрів на секунду
+            timer.Interval = 16; 
             timer.Tick += Timer_Tick;
             timer.Start();
 
@@ -45,16 +47,29 @@ namespace UPG_SP_2024
         /// <param name="e">A <see cref="T:System.Windows.Forms.PaintEventArgs">PaintEventArgs</see> that contains the event data.</param>
         protected override void OnPaint(PaintEventArgs e)
         {
+
+            float arrowLength = 20f;
             Graphics g = e.Graphics;
             List<Charge> charges = _scenario.charges;
-            scale = Math.Min(this.Width / 2, this.Height / 2);
 
-            this.DrawCharges(g, charges);
+            float margin = 20f; 
+            float squareSize = Math.Min(this.Width, this.Height) - 2 * margin;
+
+           
+            float topLeftX = (this.Width - squareSize) / 2f;
+            float topLeftY = (this.Height - squareSize) / 2f;
+            g.DrawRectangle(Pens.Black, topLeftX, topLeftY, squareSize, squareSize);
+
+            scale = (squareSize / 2f);  
+
+
+            this.DrawCharges(g, charges, this.Width, this.Height, topLeftX, topLeftY, squareSize);
 
             probe.Draw(e.Graphics, this.Width, this.Height, scale);
             PointF intensityPoint = ElectricField.CalculateField(charges, probe.X, probe.Y);
 
-            ELectricFieldVector vector = new ELectricFieldVector(probe.ScreenX, probe.ScreenY, intensityPoint);
+            
+            ELectricFieldVector vector = new ELectricFieldVector(probe.ScreenX, probe.ScreenY, intensityPoint, Math.Max(Math.Min(this.Width, this.Height) * 0.05f, arrowLength));
 
             vector.Draw(g);
 
@@ -79,11 +94,11 @@ namespace UPG_SP_2024
 
 
 
-        private void DrawCharges(Graphics g, List<Charge>  charges)
+        private void DrawCharges(Graphics g, List<Charge>  charges, float panelWidth, float panelHeight, float topLeftX, float topLeftY, float squareSize)
         {
             foreach (Charge charge in charges)
             {
-                charge.Draw(g, this.Width, this.Height);
+                charge.Draw(g, panelWidth, panelHeight, topLeftX, topLeftY, squareSize);
             }
         }
 
@@ -98,7 +113,7 @@ namespace UPG_SP_2024
         /// <param name="eventargs">An <see cref="T:System.EventArgs">EventArgs</see> that contains the event data.</param>
         protected override void OnResize(EventArgs eventargs)
         {
-            this.Invalidate();  //ensure repaint
+            this.Invalidate();  
 
             base.OnResize(eventargs);
         }

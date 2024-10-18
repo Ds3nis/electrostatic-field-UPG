@@ -45,6 +45,7 @@ namespace UPG_SP_2024
 
                 default:
                     this.charges.Add(new Charge(0, 0, 1));
+
                     break;
             }
         }

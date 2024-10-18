@@ -4,6 +4,7 @@ using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Windows.Forms.AxHost;
 
 namespace UPG_SP_2024
 {
@@ -13,47 +14,61 @@ namespace UPG_SP_2024
         private float _x;
         private float _y;
         private PointF _intensity;
-        private const float arrowLength = 40; // Довжина вектора в пікселях
+        private float _arrowLength; 
 
 
-        public ELectricFieldVector(float x, float y, PointF intensity)
+        public ELectricFieldVector(float x, float y, PointF intensity, float arrowLength)
         {
             _x = x;
             _y = y;
             _intensity = intensity;
+            _arrowLength = arrowLength;
         }
 
         public void Draw(Graphics g)
         {
-            // Нормалізація вектора інтенсивності, щоб він завжди мав однаковий розмір
+            
             float magnitude = (float)Math.Sqrt(_intensity.X * _intensity.X + _intensity.Y * _intensity.Y);
             if (magnitude > 0)
             {
                 float normalizedX = _intensity.X / magnitude;
                 float normalizedY = _intensity.Y / magnitude;
 
-                // Кінцева точка вектора з фіксованою довжиною
-                float endX = _x + normalizedX * arrowLength;
-                float endY = _y + normalizedY * arrowLength;
 
-                // Малюємо лінію
+             
+
+                float endX = _x + normalizedX * _arrowLength;
+                float endY = _y + normalizedY * _arrowLength;
+
                 Pen pen = new Pen(Color.Green, 2);
                 g.DrawLine(pen, _x, _y, endX, endY);
 
-                // Малюємо стрілку на кінці вектора
+            
                 DrawArrowHead(g, pen, _x, _y, endX, endY);
 
-                // Підписуємо величину поля
-                string text = $"|E| = {magnitude:F2}";
-                Font font = new Font("Arial", 12);
-                Brush brush = Brushes.Black;
-                g.DrawString(text, font, brush, endX + 5, endY + 5);
+
+                this.DrawTitleMagnitude(g, magnitude, endX, endY);
+
+             
             }
+        }
+
+        private void DrawTitleMagnitude(Graphics g, float magnitude, float endX, float endY)
+        {
+
+            float midX = (_x + endX) / 2;
+            float midY = (_y + endY) / 2;
+            float magnitudeScaled = magnitude * 1e-9f;
+            string text = $"|E| = {magnitudeScaled:F2} * 10⁹";      
+            Font font = new Font("Arial", 10);
+            SizeF textSize = g.MeasureString(text, font);
+            Brush brush = Brushes.Black;
+            g.DrawString(text, font, brush, midX - (textSize.Width / 2), midY - (textSize.Height/ 2));
         }
 
         private void DrawArrowHead(Graphics g, Pen pen, float startX, float startY, float endX, float endY)
         {
-            float arrowSize = 10f;  // Розмір стрілки
+            float arrowSize = 10f;  
             double angle = Math.Atan2(endY - startY, endX - startX);
 
             PointF arrowPoint1 = new PointF(

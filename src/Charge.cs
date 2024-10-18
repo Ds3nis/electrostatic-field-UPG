@@ -50,20 +50,39 @@ namespace UPG_SP_2024
         }
 
 
-        private PointF WorldToScreen(float worldX, float worldY, int panelWidth, int panelHeight, float maxRadius)
+        private PointF WorldToScreen(float topLeftX, float topLeftY, float squareSize, float maxRadius)
         {
-            // Визначаємо мінімальний масштаб для збереження пропорцій
-            /*float scaleX = panelWidth / 2f;
-            float scaleY = panelHeight / 2f;
-            float scale = Math.Min(scaleX, scaleY);*/
-            // Визначаємо масштаб з урахуванням відступів, щоб заряди не виходили за межі панелі
-            float scaleX = (panelWidth - 2 * maxRadius) / 2f;  // Відступ на радіус по обидва боки
-            float scaleY = (panelHeight - 2 * maxRadius) / 2f; // Відступ на радіус по обидва боки
-            float scale = Math.Min(scaleX, scaleY);
 
-            // Перетворюємо світові координати в пікселі
-            float screenX = (worldX * scale) + (panelWidth / 2.0f);   // Центрування по осі X
-            float screenY = (worldY * scale) + (panelHeight / 2.0f);  // Центрування по осі Y
+
+            /*     float scaleX = (panelWidth) / 2f;
+                 float scaleY = (panelHeight) / 2f;
+                 float scale = Math.Min(scaleX, scaleY);*/
+
+
+            /*      float screenX = (worldX * scale) + (panelWidth / 2.0f); 
+                  float screenY = (worldY * scale) + (panelHeight / 2.0f);*/
+            /*if (screenX - maxRadius < 0)
+            {
+                screenX = maxRadius; // Зменшуємо координату X до максимального радіусу
+            }
+            else if (screenX + maxRadius > panelWidth)
+            {
+                screenX = panelWidth - maxRadius; // Зменшуємо координату X до краю панелі
+            }
+
+            if (screenY - maxRadius < 0)
+            {
+                screenY = maxRadius; // Зменшуємо координату Y до максимального радіусу
+            }
+            else if (screenY + maxRadius > panelHeight)
+            {
+                screenY = panelHeight - maxRadius; // Зменшуємо координату Y до краю панелі
+            }
+*/
+            float scale = (squareSize / 2f) - maxRadius;
+
+            float screenX = (this.X * scale) + (topLeftX + squareSize / 2f);
+            float screenY = (this.Y * scale) + (topLeftY + squareSize / 2f);
 
             this._screenX = screenX;
             this._screenY = screenY;
@@ -71,7 +90,7 @@ namespace UPG_SP_2024
             return new PointF(screenX, screenY);
         }
 
-        public void Draw(Graphics g, int panelWidth, int panelHeight)
+        public void Draw(Graphics g, float panelWidth, float panelHeight, float topLeftX, float topLeftY, float squareSize)
         {
             Color baseColor = (this.Q > 0) ? Color.Red : Color.Blue;
             Color shadowColor = Color.White;  
@@ -85,13 +104,15 @@ namespace UPG_SP_2024
             float radius = Math.Max(maxRadius, minRadius);  
             float diameter = 2 * radius;
 
-            PointF screenPosition = WorldToScreen(X, Y, panelWidth, panelHeight, radius);
+            PointF screenPosition = WorldToScreen(topLeftX, topLeftY, squareSize, maxRadius);
             var charge = new GraphicsPath();
 
             charge.AddEllipse(screenPosition.X - radius, screenPosition.Y - radius, diameter, diameter);
+            Pen eliipseBorder = new Pen(Color.Black, 3f);
+            g.DrawEllipse(eliipseBorder ,screenPosition.X - radius, screenPosition.Y - radius, diameter, diameter);
 
             var gradient = new PathGradientBrush(charge);
-            // Встановлюємо центральну точку для відблиску (трохи зміщена вгору)
+ 
             gradient.CenterPoint = new PointF(screenPosition.X + radius /3 , screenPosition.Y - radius / 3);
             gradient.InterpolationColors = new ColorBlend()
             {
@@ -106,8 +127,7 @@ namespace UPG_SP_2024
 
                 Positions = new float[] { 0.0f, 0.3f, 1f , 1.0f }
             };
-
-      /*      var chargeReion = new Region(charge);*/          
+          
             g.FillPath(gradient, charge);
             charge.CloseFigure();
       

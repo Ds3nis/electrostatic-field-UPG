@@ -12,6 +12,7 @@ namespace UPG_SP_2024
         {
 
             InitializeComponent();
+            this.MinimumSize = new Size(200,200);
             this.Size = new Size(800, 600);
             this.scenario = scenario;
             this.drawingPanel._scenario = scenario;

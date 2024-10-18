@@ -11,7 +11,8 @@ namespace UPG_SP_2024
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Scenario scenario;
+            Scenario scenario = null;
+
             if (args.Length > 0)
             {
                 if (int.TryParse(args[0], out int number))
@@ -19,23 +20,27 @@ namespace UPG_SP_2024
                     scenario = new Scenario(number);
                     MessageBox.Show("Ziskane cele cislo: " + number, "Informace", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-                else
+                else 
                 {
                     MessageBox.Show("Chyba: predany argument neni cele cislo.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    scenario = new Scenario(0);
+                    Application.Exit();
                 }
             }
             else
             {
-                scenario = new Scenario(0);              
+                scenario = new Scenario(0);  
             }
 
-            MainForm mainForm = new MainForm(scenario);
-            Application.Run(mainForm);
-
-          
-
  
+            if (scenario != null)
+            {
+                MainForm mainForm = new MainForm(scenario);
+                Application.Run(mainForm);
+            }
+
+
+
+
         }
     }
 }
