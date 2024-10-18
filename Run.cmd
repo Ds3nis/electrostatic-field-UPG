@@ -1,1 +1,1 @@
-./bin/ElectricFieldVis.exe %*
+.\bin\ElectricFieldVis.exe %*
