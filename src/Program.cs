@@ -5,8 +5,14 @@ namespace UPG_SP_2024
     internal static class Program
     {
         /// <summary>
-        ///  The main entry point for the application.
+        /// Hlavn? vstupn? bod pro aplikaci.
+        /// Inicializuje vizu?ln? styly a spust? hlavn? okno aplikace.
+        /// Pokud jsou p?ed?ny argumenty, pokus? se prvn? z nich p?ev?st na cel? ??slo.
+        /// V p??pad? ?sp?chu je vytvo?en sc?n?? s t?mto ??slem.
+        /// Pokud p?evod sel?e, zobraz? se chybov? zpr?va a aplikace se ukon??.
+        /// Pokud nejsou p?ed?ny ??dn? argumenty, vytvo?? se v?choz? sc?n??.
         /// </summary>
+        /// <param name="args">Pole ?et?zc? obsahuj?c? argumenty p??kazov?ho ??dku p?edan? aplikaci.</param>
         static void Main(string[] args)
         {
             Application.EnableVisualStyles();
@@ -31,12 +37,10 @@ namespace UPG_SP_2024
                 scenario = new Scenario(0);  
             }
 
- 
-            if (scenario != null)
-            {
-                MainForm mainForm = new MainForm(scenario);
-                Application.Run(mainForm);
-            }
+          
+               MainForm mainForm = new MainForm(scenario);
+               Application.Run(mainForm);
+            
 
 
 

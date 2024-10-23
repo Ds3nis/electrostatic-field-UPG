@@ -10,7 +10,9 @@ namespace UPG_SP_2024
 {
 
 
-
+    /// <summary>
+    /// Třída reprezentující elektrický náboj.
+    /// </summary>
     public class Charge
     {
         private float _x;
@@ -42,6 +44,12 @@ namespace UPG_SP_2024
         }
 
 
+        /// <summary>
+        /// Konstruktor pro inicializaci náboje s jeho souřadnicemi a hodnotou náboje.
+        /// </summary>
+        /// <param name="x">X-ová realna souřadnice náboje.</param>
+        /// <param name="y">Y-ová realna souřadnice náboje.</param>
+        /// <param name="Q">Hodnota náboje Q.</param>
         public Charge(float x, float y, float Q)
         {
             this.X = x;
@@ -49,36 +57,17 @@ namespace UPG_SP_2024
             this.Q = Q;
         }
 
-
+        /// <summary>
+        /// Převádí souřadnice světa na souřadnice obrazovky.
+        /// </summary>
+        /// <param name="topLeftX">X-ová souřadnice levého horního rohu světa.</param>
+        /// <param name="topLeftY">Y-ová souřadnice levého horního rohu světa.</param>
+        /// <param name="squareSize">Velikost čtverce reprezentujícího svět.</param>
+        /// <param name="maxRadius">Maximální poloměr zobrazení náboje.</param>
+        /// <returns>Vrací bod typu <see cref="PointF"/> s převedenými souřadnicemi.</returns>
         private PointF WorldToScreen(float topLeftX, float topLeftY, float squareSize, float maxRadius)
         {
 
-
-            /*     float scaleX = (panelWidth) / 2f;
-                 float scaleY = (panelHeight) / 2f;
-                 float scale = Math.Min(scaleX, scaleY);*/
-
-
-            /*      float screenX = (worldX * scale) + (panelWidth / 2.0f); 
-                  float screenY = (worldY * scale) + (panelHeight / 2.0f);*/
-            /*if (screenX - maxRadius < 0)
-            {
-                screenX = maxRadius; // Зменшуємо координату X до максимального радіусу
-            }
-            else if (screenX + maxRadius > panelWidth)
-            {
-                screenX = panelWidth - maxRadius; // Зменшуємо координату X до краю панелі
-            }
-
-            if (screenY - maxRadius < 0)
-            {
-                screenY = maxRadius; // Зменшуємо координату Y до максимального радіусу
-            }
-            else if (screenY + maxRadius > panelHeight)
-            {
-                screenY = panelHeight - maxRadius; // Зменшуємо координату Y до краю панелі
-            }
-*/
             float scale = (squareSize / 2f) - maxRadius;
 
             float screenX = (this.X * scale) + (topLeftX + squareSize / 2f);
@@ -90,6 +79,18 @@ namespace UPG_SP_2024
             return new PointF(screenX, screenY);
         }
 
+
+
+
+        /// <summary>
+        /// Kreslí náboj na dané grafické ploše.
+        /// </summary>
+        /// <param name="g">Grafická plocha, kde bude náboj vykreslen.</param>
+        /// <param name="panelWidth">Šířka panelu.</param>
+        /// <param name="panelHeight">Výška panelu.</param>
+        /// <param name="topLeftX">X-ová souřadnice levého horního rohu sveta.</param>
+        /// <param name="topLeftY">Y-ová souřadnice levého horního rohu sveta.</param>
+        /// <param name="squareSize">Velikost čtverce reprezentujícího svět.</param>
         public void Draw(Graphics g, float panelWidth, float panelHeight, float topLeftX, float topLeftY, float squareSize)
         {
             Color baseColor = (this.Q > 0) ? Color.Red : Color.Blue;
@@ -138,6 +139,9 @@ namespace UPG_SP_2024
             float textY = screenPosition.Y - (textSize.Height / 2);
 
             g.DrawString(text, new Font("Arial", 14), Brushes.White, textX, textY);
+           
+           
+
         }
   
      
