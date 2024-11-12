@@ -31,7 +31,7 @@ namespace UPG_SP_2024
         /// </summary>
         private void InitializeComponent()
         {
-            drawingPanel = new DrawingPanel();
+     
             SuspendLayout();
             // 
             // drawingPanel

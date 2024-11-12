@@ -17,12 +17,35 @@ namespace UPG_SP_2024
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Scenario scenario = null;
+            Scenario scenario;
+            int gridSpacingX = 40;
+            int gridSpacingY = 40;
+
+
+  
 
             if (args.Length > 0)
             {
+                
                 if (int.TryParse(args[0], out int number))
                 {
+                    foreach (string arg in args)
+                    {
+                        if (arg.StartsWith("-g"))
+                        {
+                            string[] dimensions = arg.Substring(2).Split('x');
+                            if (dimensions.Length == 2 && int.TryParse(dimensions[0], out gridSpacingX) && int.TryParse(dimensions[1], out gridSpacingY))
+                            {
+                                break; // Nalezen platný parametr, ukonèit cyklus
+                            }
+                            else
+                            {
+                                MessageBox.Show("Chybný formát parametru -g. Oèekávaný formát: -g<X>x<Y>", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
+               
+                                break;
+                            }
+                        }
+                    }
                     scenario = new Scenario(number);
                     MessageBox.Show("Ziskane cele cislo: " + number, "Informace", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
@@ -30,15 +53,16 @@ namespace UPG_SP_2024
                 {
                     MessageBox.Show("Chyba: predany argument neni cele cislo.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Application.Exit();
+                    scenario = new Scenario(0);
                 }
             }
             else
             {
-                scenario = new Scenario(0);  
+                scenario = new Scenario(2);  
             }
 
           
-               MainForm mainForm = new MainForm(scenario);
+               MainForm mainForm = new MainForm(scenario, gridSpacingX, gridSpacingY);
                Application.Run(mainForm);
             
 

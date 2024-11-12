@@ -20,14 +20,17 @@ namespace UPG_SP_2024
         private float _q;
         private float _screenX;
         private float _screenY;
+        private float radius;
         public float X
         {
             get { return _x; }
             set { _x = value; }
         }
 
+        public float Radius { get { return this.radius; } }
+
         
-        public float ScreenX { get { return _screenX; } }
+        public float ScreenX { get { return _screenX; }  }
 
         public float ScreenY { get { return _screenY; } }
 
@@ -65,7 +68,7 @@ namespace UPG_SP_2024
         /// <param name="squareSize">Velikost čtverce reprezentujícího svět.</param>
         /// <param name="maxRadius">Maximální poloměr zobrazení náboje.</param>
         /// <returns>Vrací bod typu <see cref="PointF"/> s převedenými souřadnicemi.</returns>
-        private PointF WorldToScreen(float topLeftX, float topLeftY, float squareSize, float maxRadius)
+        public PointF WorldToScreen(float topLeftX, float topLeftY, float squareSize, float maxRadius)
         {
 
             float scale = (squareSize / 2f) - maxRadius;
@@ -102,7 +105,8 @@ namespace UPG_SP_2024
             float minRadius = 15f; 
 
           
-            float radius = Math.Max(maxRadius, minRadius);  
+            float radius = Math.Max(maxRadius, minRadius);
+            this.radius = radius;
             float diameter = 2 * radius;
 
             PointF screenPosition = WorldToScreen(topLeftX, topLeftY, squareSize, maxRadius);
@@ -128,6 +132,8 @@ namespace UPG_SP_2024
 
                 Positions = new float[] { 0.0f, 0.3f, 1f , 1.0f }
             };
+
+            Region chargeRegion = new Region(charge);
           
             g.FillPath(gradient, charge);
             charge.CloseFigure();

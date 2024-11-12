@@ -57,6 +57,11 @@ namespace UPG_SP_2024
                     this.charges.Add(new Charge(-1, 1, -4));
                     break;
 
+                case 4:
+                    this.charges.Add(new Charge(-1, 0, 1));
+                    this.charges.Add(new Charge(1, 0, 1));
+                    break;
+
                 default:
                     this.charges.Add(new Charge(0, 0, 1));
 
