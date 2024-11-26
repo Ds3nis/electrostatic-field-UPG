@@ -1,7 +1,11 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+
+
 
 
 namespace UPG_SP_2024
@@ -29,7 +33,12 @@ namespace UPG_SP_2024
         private Charge selectedCharge = null;
         private Point lastMousePosition;
         private ToolTip chargeToolTip;
+        private int blockSize = 10;
 
+        private ColourMap[] Lut { get; set; }
+
+
+        private Bitmap colorMapBitmap;
 
         /// <summary>
         /// Konstruktor třídy <see cref="DrawingPanel"/>, který inicializuje panel, časovač a výchozí scénář.
@@ -42,8 +51,8 @@ namespace UPG_SP_2024
 
             if (this._gridSpacingX == 0 && this._gridSpacingY == 0)
             {
-                this._gridSpacingX = 40;
-                this._gridSpacingY = 40;
+                this._gridSpacingX = 50;
+                this._gridSpacingY = 50;
             }
 
 
@@ -51,6 +60,8 @@ namespace UPG_SP_2024
             {
                 _scenario = new Scenario(0);
             }
+
+            this.Lut = MakeLut();
 
             chargeToolTip = new ToolTip();
             this.ClientSize = new System.Drawing.Size(800, 600);
@@ -84,11 +95,11 @@ namespace UPG_SP_2024
             if (selectedCharge != null)
             {
                 
-                float dx = (e.X - lastMousePosition.X) / scale;
-                float dy = (e.Y - lastMousePosition.Y) / scale;
+                float dx = (e.X - lastMousePosition.X) / (scale - selectedCharge.Radius);
+                float dy = (e.Y - lastMousePosition.Y) / (scale - selectedCharge.Radius);
 
-                chargeToolTip.Show($"Position of mouse: ({dx}, {dy})\nCharge: ({selectedCharge.X}, {selectedCharge.Y})",
-                                       this, e.X + 10, e.Y + 10);
+                //chargeToolTip.Show($"Position of mouse: ({dx}, {dy})\nCharge: ({selectedCharge.X}, {selectedCharge.Y})",
+                //                       this, e.X + 10, e.Y + 10);
 
                 selectedCharge.X += dx;
                 selectedCharge.Y += dy;
@@ -132,21 +143,27 @@ namespace UPG_SP_2024
         {
 
             Graphics g = e.Graphics;
-      
+
+
             float squareSize = Math.Min(this.Width, this.Height) - 2 * margin;
 
-           
+
             float topLeftX = (this.Width - squareSize) / 2f;
             float topLeftY = (this.Height - squareSize) / 2f;
             g.DrawRectangle(Pens.Black, topLeftX, topLeftY, squareSize, squareSize);
 
             scale = (squareSize / 2f);
 
-            // Vykreslení nábojů na panel.
+            this.CalculateFieldIntensitiesOnGrid();
+
+            if (colorMapBitmap != null)
+            {
+                g.DrawImage(colorMapBitmap, 0, 0, this.Width, this.Height);
+            }
+        
             this.DrawFieldGrid(g, charges);
             this.DrawCharges(g, charges, this.Width, this.Height, topLeftX, topLeftY, squareSize);
          
-
             probe.Draw(e.Graphics, this.Width, this.Height, scale);
             // Výpočet intenzity elektrického pole v místě sondy.
             PointF intensityPoint = ElectricField.CalculateField(charges, probe.X, probe.Y);
@@ -156,13 +173,104 @@ namespace UPG_SP_2024
 
             vector.Draw(g, Color.Green);
 
-          
+       
 
 
         }
 
 
-  
+
+        private ColourMap[] MakeLut()
+        {
+
+            List<ColourMap> colorMap = new List<ColourMap>
+            {
+                new ColourMap(0.1f, Color.Blue),
+                new ColourMap(0.15f, Color.Cyan),
+                new ColourMap(0.2f, Color.LimeGreen),
+                new ColourMap(0.3f, Color.Yellow),
+                new ColourMap(0.5f, Color.Red)
+            };
+
+            return colorMap.ToArray();
+        }
+
+        public Color GetColor(float normalizedIntensity)
+        {
+            for (int i = 0; i < Lut.Length - 1; i++)
+            {
+                var lower = Lut[i];
+                var upper = Lut[i + 1];
+
+                if (normalizedIntensity >= lower.Threshold && normalizedIntensity <= upper.Threshold)
+                {
+                    // Визначення пропорції між точками
+                    float t = (normalizedIntensity - lower.Threshold) / (upper.Threshold - lower.Threshold);
+
+                    // Лінійна інтерполяція компонентів R, G, B
+                    int r = (int)(lower.ColorValue.R + t * (upper.ColorValue.R - lower.ColorValue.R));
+                    int g = (int)(lower.ColorValue.G + t * (upper.ColorValue.G - lower.ColorValue.G));
+                    int b = (int)(lower.ColorValue.B + t * (upper.ColorValue.B - lower.ColorValue.B));
+
+                    return Color.FromArgb(r, g, b);
+                }
+            }
+
+            // Якщо інтенсивність виходить за межі LUT
+            return normalizedIntensity < Lut[0].Threshold ? Lut[0].ColorValue : Lut[Lut.Length - 1].ColorValue;
+        }
+
+
+        private void UpdateColorMap(float[,] fieldIntensities, float minFieldMagnitude, float maxFieldMagnitude)
+        {
+
+            //int width = fieldMagnitudes.GetLength(0);
+            //int height = fieldMagnitudes.GetLength(1);
+
+            //int bitmapWidth = width * pixelBlockSize;
+            //int bitmapHeight = height * pixelBlockSize;
+
+            this.colorMapBitmap = new Bitmap(this.Width, this.Height, PixelFormat.Format24bppRgb);
+            BitmapData bmpData = colorMapBitmap.LockBits(new Rectangle(0, 0, colorMapBitmap.Width, colorMapBitmap.Height),
+                                                         ImageLockMode.WriteOnly, colorMapBitmap.PixelFormat);
+            IntPtr ptr = bmpData.Scan0;
+            int heightInPixels = bmpData.Height;        
+            byte[] pixelBuffer = new byte[bmpData.Height * bmpData.Stride];
+
+            float logMax = maxFieldMagnitude > 0 ? (float)(Math.Log10(maxFieldMagnitude + 1)) : 0;
+            float logMin = minFieldMagnitude > 0 ? (float)(Math.Log10(minFieldMagnitude + 1)) : 0;
+            float normalizedMagnitude = 0.0f;
+            for (int x = 0, offset = 0; x < bmpData.Height; x++)
+            {
+                for (int y = 0, index = offset; y < bmpData.Width; y++, index +=3)
+                {
+
+                    float magnitude = fieldIntensities[y, x];
+
+                    float logMagnitude = magnitude > 0 ? (float)(Math.Log10(magnitude + 1)) : 0;
+
+                    if (logMax > logMin)
+                        normalizedMagnitude = (logMagnitude - logMin) / (logMax - logMin);
+
+                    normalizedMagnitude = Math.Clamp(normalizedMagnitude, 0.0f, 1.0f);
+
+                    Color color = GetColor(normalizedMagnitude);
+
+                    pixelBuffer[index] = color.B;
+                    pixelBuffer[index + 1] = color.G;
+                    pixelBuffer[index + 2] = color.R;
+                }
+                offset += bmpData.Stride;
+            }
+
+            Marshal.Copy(pixelBuffer, 0, ptr, pixelBuffer.Length);
+            colorMapBitmap.UnlockBits(bmpData);
+        }
+
+
+
+
+
 
 
         private void DrawFieldGrid(Graphics g, List<Charge> charges)
@@ -172,40 +280,72 @@ namespace UPG_SP_2024
 
             float topLeftX = margin;
             float topLeftY = margin;
-
-            // Визначення кольору та стилю для сітки.
+         
             Pen gridPen = new Pen(Color.LightGray, 1);
+            float[,] intensities = new float[this.Width, this.Height];
+           
 
-            // Малювання вертикальних ліній сітки.
+            float maxRadius = Math.Min(this.Width, this.Height) * 0.05f;
+            float minRadius = 15f;
+            float radius = Math.Max(maxRadius, minRadius);
+
             for (float x = topLeftX; x <= topLeftX + gridWidth; x += _gridSpacingX)
             {
                 g.DrawLine(gridPen, x, topLeftY, x, topLeftY + gridHeight);
-            }
 
-            // Малювання горизонтальних ліній сітки.
-            for (float y = topLeftY; y <= topLeftY + gridHeight; y += _gridSpacingY)
-            {
-                g.DrawLine(gridPen, topLeftX, y, topLeftX + gridWidth, y);
-            }
-
-            // Відображення векторів інтенсивності електричного поля в кожному вузлі сітки.
-            for (float x = topLeftX; x <= topLeftX + gridWidth; x += _gridSpacingX)
-            {
                 for (float y = topLeftY; y <= topLeftY + gridHeight; y += _gridSpacingY)
                 {
-                    float worldX = (x - this.Width / 2) / scale;
-                    float worldY = (y - this.Height / 2) / scale;
+                    g.DrawLine(gridPen, topLeftX, y, topLeftX + gridWidth, y);
+                    float worldX = (x - this.Width / 2) / (scale - maxRadius);
+                    float worldY = (y - this.Height / 2) / (scale - maxRadius);
                     PointF fieldIntensity = ElectricField.CalculateField(charges, worldX, worldY);
-
-                    // Використання половини довжини та більш тонкого пензля для статичних стрілок.
+                    float magnitude = (float)Math.Sqrt(fieldIntensity.X * fieldIntensity.X + fieldIntensity.Y * fieldIntensity.Y);
+                 
                     ELectricFieldVector vector = new ELectricFieldVector(x, y, fieldIntensity, arrowLength / 2, scale);
                     vector.DrawStatic(g, Color.Red);
                 }
             }
 
-            gridPen.Dispose(); // Звільнення ресурсу
+            gridPen.Dispose(); 
         }
 
+
+        private void CalculateFieldIntensitiesOnGrid()
+        {
+            //int gridWidth = this.Width / blockSize;
+            //int gridHeight = this.Height / blockSize;
+
+            //float width = Math.Max(gridWidth, 1);
+            //float height = Math.Max(gridHeight, 1);
+
+            float[,] intensities = new float[this.Width, this.Height];
+
+            float localMin = float.MaxValue;
+            float localMax = float.MinValue;
+
+            float maxRadius = Math.Min(this.Width, this.Height) * 0.05f;
+            float minRadius = 15f;
+            float radius = Math.Max(maxRadius, minRadius);
+
+            for (int i = 0; i < this.Height; i++)
+            {
+                for (int j = 0; j < this.Width; j++)
+                {
+                    float worldX = (j - this.Width / 2) / (scale - maxRadius);
+                    float worldY = (i - this.Height / 2) / (scale - maxRadius);
+                    PointF fieldIntensity = ElectricField.CalculateField(this.charges, worldX, worldY);
+                    float magnitude = (float)Math.Sqrt(fieldIntensity.X * fieldIntensity.X + fieldIntensity.Y * fieldIntensity.Y);
+
+
+                    intensities[j, i] = magnitude;
+
+                    if (magnitude < localMin) localMin = magnitude;
+                    if (magnitude > localMax) localMax = magnitude;
+                }
+            }
+
+            this.UpdateColorMap(intensities, localMin, localMax);
+        }
 
 
 
