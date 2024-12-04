@@ -11,4 +11,8 @@
     <DocumentationFile></DocumentationFile>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.WinForms" Version="2.0.0-rc4.5" />
+  </ItemGroup>
+
 </Project>

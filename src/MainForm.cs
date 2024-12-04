@@ -25,7 +25,7 @@ namespace UPG_SP_2024
             drawingPanel = new DrawingPanel(scenario, gridX, gridY);
             InitializeComponent(); // Inicializuje komponenty formul??e.
          
-            this.MinimumSize = new Size(200, 200); // Nastav? minim?ln? velikost formul??e.
+            this.MinimumSize = new Size(500, 500); // Nastav? minim?ln? velikost formul??e.
             this.Size = new Size(800, 600); // Nastav? v?choz? velikost formul??e.
             this.scenario = scenario; // Ulo?? sc?n?? do soukrom? prom?nn?.
             this.gridX = gridX;

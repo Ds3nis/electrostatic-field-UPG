@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace UPG_SP_2024
 {
@@ -21,6 +22,15 @@ namespace UPG_SP_2024
         private float _screenX;
         private float _screenY;
         private float radius;
+        private float scale;
+        private float scenario4Q = 0;
+
+        public float Scenario4Q
+        {
+            get {  return scenario4Q; }
+            set { scenario4Q = value; }
+        }
+
         public float X
         {
             get { return _x; }
@@ -47,6 +57,11 @@ namespace UPG_SP_2024
         }
 
 
+        public float PanelScale { get; set; } = 1f;
+
+
+
+
         /// <summary>
         /// Konstruktor pro inicializaci náboje s jeho souřadnicemi a hodnotou náboje.
         /// </summary>
@@ -58,7 +73,10 @@ namespace UPG_SP_2024
             this.X = x;
             this.Y = y;
             this.Q = Q;
+            UpdateRadius();
         }
+
+       
 
         /// <summary>
         /// Převádí souřadnice světa na souřadnice obrazovky.
@@ -73,13 +91,27 @@ namespace UPG_SP_2024
 
             float scale = (squareSize / 2f) - maxRadius;
 
+
+
             float screenX = (this.X * scale) + (topLeftX + squareSize / 2f);
             float screenY = (this.Y * scale) + (topLeftY + squareSize / 2f);
 
-            this._screenX = screenX;
-            this._screenY = screenY;
+        
 
             return new PointF(screenX, screenY);
+        }
+
+        public void UpdateRadius()
+        {
+            const float baseRadius = 6f; //Мінімальний розмір
+            const float maxRadius = 100f;  // Максимальний розмір
+            const float scalingFactor = 20f; // Фактор чутливості
+
+            // Попереднє обчислення радіуса залежно від Q
+            float calculatedRadius = Math.Abs(Q) * scalingFactor * PanelScale;
+
+            // Обмеження радіуса у межах [baseRadius, maxRadius]
+            this.radius = Math.Clamp(calculatedRadius, baseRadius, maxRadius);
         }
 
 
@@ -94,27 +126,39 @@ namespace UPG_SP_2024
         /// <param name="topLeftX">X-ová souřadnice levého horního rohu sveta.</param>
         /// <param name="topLeftY">Y-ová souřadnice levého horního rohu sveta.</param>
         /// <param name="squareSize">Velikost čtverce reprezentujícího svět.</param>
-        public void Draw(Graphics g, float panelWidth, float panelHeight, float topLeftX, float topLeftY, float squareSize)
+        public void Draw(Graphics g, float panelWidth, float panelHeight, float topLeftX, float topLeftY, float squareSize, float scale)
         {
+            this.scale = scale;
+            float panelMinSize = Math.Min(panelWidth, panelHeight);
+            float scaleFactor = panelMinSize / 500f; // Базовий розмір для масштабу 
+            this.PanelScale = scaleFactor; // Оновлюємо масштаб для кожного заряду
+ 
+            UpdateRadius();
             Color baseColor = (this.Q > 0) ? Color.Red : Color.Blue;
             Color shadowColor = Color.White;  
             Color highlightColor = ControlPaint.Light(baseColor);
 
-     
-            float maxRadius = Math.Min(panelWidth, panelHeight) * 0.05f; 
-            float minRadius = 15f; 
 
-          
-            float radius = Math.Max(maxRadius, minRadius);
-            this.radius = radius;
-            float diameter = 2 * radius;
+            //float maxRadius = Math.Min(panelWidth, panelHeight) * 0.05f; 
+            //float minRadius = 15f;
 
-            PointF screenPosition = WorldToScreen(topLeftX, topLeftY, squareSize, maxRadius);
+
+            //float radius = Math.Max(maxRadius, minRadius);
+            //float maxRadius = squareSize * 0.09f; // Максимальний розмір заряду (5% від розміру панелі)
+            //float minRadius = 5f;                // Мінімальний розмір заряду
+            //float radius = Math.Clamp(Math.Abs(this.Q) * scale, minRadius, maxRadius);
+            ////this.radius = radius;
+            //this.radius = Math.Max(Math.Abs(this.Q), scale * 0.1f);
+            float diameter = 2 * this.radius;
+
+            PointF screenPosition = WorldToScreen(topLeftX, topLeftY, squareSize, this.radius);
+            this._screenX = screenPosition.X;
+            this._screenY = screenPosition.Y;
             var charge = new GraphicsPath();
 
             charge.AddEllipse(screenPosition.X - radius, screenPosition.Y - radius, diameter, diameter);
             Pen eliipseBorder = new Pen(Color.Black, 3f);
-            g.DrawEllipse(eliipseBorder ,screenPosition.X - radius, screenPosition.Y - radius, diameter, diameter);
+            g.DrawEllipse(eliipseBorder ,screenPosition.X - this.radius, screenPosition.Y - this.radius, diameter, diameter);
 
             var gradient = new PathGradientBrush(charge);
  
@@ -138,7 +182,7 @@ namespace UPG_SP_2024
             g.FillPath(gradient, charge);
             charge.CloseFigure();
       
-            string text = $"{Q.ToString()}";
+            string text = $"{Math.Round(Q, 2).ToString()}";
             SizeF textSize = g.MeasureString(text, new Font("Arial", 14));
 
             float textX = screenPosition.X - (textSize.Width / 2);

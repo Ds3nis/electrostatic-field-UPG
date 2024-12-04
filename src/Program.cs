@@ -18,8 +18,8 @@ namespace UPG_SP_2024
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Scenario scenario;
-            int gridSpacingX = 90;
-            int gridSpacingY = 90;
+            int gridSpacingX = 50;
+            int gridSpacingY = 50;
 
 
   
@@ -58,7 +58,7 @@ namespace UPG_SP_2024
             }
             else
             {
-                scenario = new Scenario(0);  
+                scenario = new Scenario(4);  
             }
 
           
